@@ -1,0 +1,181 @@
+\begin{frame}{Sparse optimization}
+    \begin{tikzpicture}[remember picture,overlay]
+        \begin{scope}[xshift=0.5\textwidth]
+            \onslide<1-> {
+                \node[text width=0.75\linewidth,align=center] at (0,3.4) {\textbf{Sparse optimization} \\Minimize a function using a sparse vector};
+            }
+            %
+            %
+            %
+            \onslide<2-> {
+                \begin{scope}[yshift=40]
+                \path[
+                    mindmap,
+                    concept color=mDarkTeal, 
+                    level 1 concept/.append style={
+                    minimum size    = 1.1cm,
+                    text width      = 1.1cm,
+                    level distance  = 3cm,
+                    sibling angle   = 60,
+                    font            = \scriptsize\bfseries,
+                    },
+                    level 2 concept/.append style={
+                    minimum size    = 1.1cm,
+                    text width      = 1.1cm,
+                    level distance  = 2cm,
+                    sibling angle   = 45,
+                    font            = \scriptsize,
+                    }
+                ]
+                node[concept,text=white,minimum size=1.6cm,text width=2.25cm] {\normalsize\textbf{Applications}}
+                [clockwise from=0]
+                child[concept color=TolLightRed!40] {
+                    node[concept] {signal process.}
+                    [clockwise from=45]
+                    child { node[concept] {signal denoising} }
+                    child { node[concept] {sparse decoding} }
+                    child { node[concept] {phase retrieval} }
+                    child { node[concept] {DOA design} }
+                }  
+                child[concept color=TolLightBrown!40] {
+                    node[concept] {operation research}
+                    [clockwise from=337.5]
+                    child { node[concept] {portfolio optim.} }
+                    child { node[concept] {network design} }
+                    child { node[concept] {facility location} }
+                }
+                child[concept color=TolLightGreen!40] {
+                    node[concept] {algebra}
+                    [clockwise from=-67.5]
+                    child { node[concept] {sparse factor.} }
+                    child { node[concept] {low-rank factor.} }
+                    child { node[concept] {feasible system} }
+                }
+                child[concept color=TolDarkBlue!40] {
+                    node[concept] {statistics \& ML} 
+                    [clockwise from=-90]
+                    child { node[concept] {sparse PCA} }
+                    child { node[concept] {sparse SVM} }
+                    child { node[concept] {dictionary learning} }
+                    child { node[concept] {feature selection} }
+                };
+                \end{scope}
+                %
+                \node[font=\small] at (0,-4) {A. Tillmann \textit{et al.} (2024)};
+            }
+            %
+            %
+            %
+            \onslide<3> {
+                \node[draw, ultra thick, fill=TolLightWhite, text width=0.325\linewidth,align=center,font=\scriptsize] at (-4,1.25) {$\begin{array}{rcl}
+                    \text{cost} & \rightarrow & \text{model accuracy} \\
+                    \text{sparsity} & \rightarrow & \text{model explainability}
+                \end{array}$};
+            }
+            %
+            %
+            %
+            \onslide<4> {
+                \node[draw, ultra thick, fill=TolLightWhite, text width=0.325\linewidth,align=center,font=\scriptsize] at (-2,-2) {$\begin{array}{rcl}
+                    \text{cost} & \rightarrow & \text{SVD decomposition} \\
+                    \text{sparsity} & \rightarrow & \text{low rank SVD}
+                \end{array}$};
+            }
+            %
+            %
+            %
+            \onslide<5> {
+                \node[draw, ultra thick, fill=TolLightWhite, text width=0.325\linewidth,align=center,font=\scriptsize] at (2,-2) {$\begin{array}{rcl}
+                    \text{cost} & \rightarrow & \text{return on products} \\
+                    \text{sparsity} & \rightarrow & \text{unit production cost}
+                \end{array}$};
+            }
+            %
+            %
+            %
+            \onslide<6> {
+                \node[draw, ultra thick, fill=TolLightWhite, text width=0.325\linewidth,align=center,font=\scriptsize] at (4,1.25) {$\begin{array}{rcl}
+                    \text{cost} & \rightarrow & \text{signal recovery} \\
+                    \text{sparsity} & \rightarrow & \text{signal spikes}
+                \end{array}$};
+            }
+        \end{scope}
+    \end{tikzpicture}
+\end{frame}
+  
+\begin{frame}{$\ell_0$-regularized problems}
+    \begin{tikzpicture}[remember picture,overlay]
+        \begin{scope}[xshift=0.5\textwidth]
+            \onslide<1-> {
+                \node[text width=0.75\linewidth,align=center] (sparse) at (0,3.4) {\textbf{Sparse optimization} \\ Minimize a function using a sparse vector};
+            }
+            %
+            %
+            %
+            \onslide<2-> {
+                \node[text width=0.35\textwidth,align=center] (loss) at (-3,1) {\textcolor{TolLightOrange}{$\lfunc(\pv)$} \\ loss function};
+                %
+                \draw [ultra thick,->] ($(sparse)+(-1.5,-0.5)$) -- (loss) node[midway,fill=TolLightWhite,draw,ultra thick] {\phantom{i}\phantom{i}cost\phantom{p}};
+            }
+            %
+            %
+            %
+            \onslide<3-> {
+                \node[text width=0.35\textwidth,align=center] (norm) at (3,1) {\textcolor{TolLightOrange}{$\norm{\pv}{0}$} \\ $\ell_0$-norm};
+                %
+                \draw[ultra thick,dashed,->] ($(norm)+(0.5,0.25)$) .. controls ($(norm)+(1.75,0.5)$) .. ($(norm)+(1.75,1)$) node[above,text width=0.3\textwidth,align=center,font=\small] {counts number of non-zeros in $\pv$};
+                %
+                \draw [ultra thick,->] ($(sparse)+(1.5,-0.5)$) -- (norm) node[midway,fill=TolLightWhite,draw,ultra thick] {sparsity};
+            }
+            %
+            %
+            %
+            \onslide<4-> {
+                \draw [ultra thick,<->] ($(loss)+(1.25,0)$) -- ($(norm)+(-1.25,0)$);
+                %
+                \node[text width=0.45\textwidth] (prob) at (0,-0.5) {
+                \begin{blockcolor}{mDarkTeal}{\textbf{$\ell_0$-regularized problem}}
+                    \centering
+                    $\min_{\pv \in \kR^{\pdim}} \lfunc(\pv) + \reg\norm{\pv}{0}$
+                \end{blockcolor}
+                };
+            }
+            %
+            %
+            %
+            \onslide<5-> {
+                \node[text width=0.45\textwidth] (prob) at (0,-0.5) {
+                \begin{blockcolor}{mDarkTeal}{\textbf{$\ell_0$-regularized problem}}
+                    \centering
+                    $\min_{\pv \in \kR^{\pdim}} \lfunc(\pv) + \reg\norm{\pv}{0} +  \pfunc(\pv)$
+                \end{blockcolor}
+                };
+            }
+            %
+            %
+            %
+            \onslide<6-> {
+                \node (np) at ($(prob.east)+(1,-0.15)$) {$\rightarrow$ NP-hard};
+            }
+            %
+            %
+            %
+            \onslide<7-> {
+                \node[text width=0.75\linewidth,align=center] at ($(prob.south)+(-3,-1.5)$) {\textbf{MIP-based methods} \\ Rely on off-the-shelf solvers \\ \textcolor{TolLightRed}{\ding{55}} Poor numerical performances};
+            }
+            %
+            %
+            %
+            \onslide<8-> {
+                \node[text width=0.75\linewidth,align=center] (bnb) at ($(prob.south)+(3,-1.5)$) {\textbf{BnB-based methods} \\ Tailored solution method \\ \textcolor{TolLightGreen}{\ding{51}} Better numerical performances};
+            }
+            %
+            %
+            %
+            \onslide<9-> {
+                \draw[draw,ultra thick,rounded corners=5pt] ($(bnb)+(-2.75,-1)$) rectangle ($(bnb)+(2.75,1)$);
+                \node[fill=TolLightWhite,text=TolLightOrange] at ($(bnb)+(0,1)$) {Topic of this talk};
+            }
+        \end{scope}
+    \end{tikzpicture}
+\end{frame}

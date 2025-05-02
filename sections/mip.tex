@@ -1,0 +1,178 @@
+\section{Mixed-Integer Programming}
+
+\begin{frame}{MIP -- Formulation}
+    \begin{tikzpicture}[remember picture,overlay]
+        \begin{scope}[xshift=0.5\textwidth]
+            \onslide<1-> {
+                \node[align=center,text width=0.45\textwidth] (problem) at (-2.75,3.25) {
+                    \begin{blockcolor}{mDarkTeal}{Problem}
+                    \centering
+                    $\min_{\pv \in \kR^{\pdim}} \lfunc(\pv) + \reg\norm{\pv}{0} + \pfunc(\pv)$
+                    \end{blockcolor}
+                };
+                %
+                \node[text width=0.55\linewidth,align=center,font=\small] at ($(problem)+(5.75,-0.15)$) {\textbf{MIP formulation} \\ Use standardized expressions \\ linear, quadratic, conic, ...};
+            }
+            %
+            %
+            %
+            \onslide<2-> {
+                \node (mip) at ($(problem)+(0,-2.9)$) {};
+                \node[text width=0.525\linewidth,align=center,font=\small] at ($(mip)+(5.75,-0.15)$) {\textbf{Linearize the $\boldsymbol{\ell}_{\0}$-norm} \\ We have $\norm{\pv}{0}$ $=$ $\transp{\1}\bv$ whenever \\ $\bvi{\idxentry} = 0$ $\iff$ $\pvi{\idxentry} = 0, \  \forall \idxentry$ \\ $\bvi{\idxentry} = 1$ $\iff$ $\pvi{\idxentry} \neq 0, \  \forall \idxentry$ \\ for all $\pv \in \kR^{\pdim}$ and $\bv \in \{0,1\}^{\pdim}$};
+            }
+            %
+            %
+            %
+            \onslide<3-> {
+                \node[align=center,text width=0.45\textwidth] (mip) at ($(problem)+(0,-2.9)$) {
+                    \begin{blockcolor}{mDarkTeal}{Linearized formulation}
+                    \centering
+                    $\left\{\begin{array}{rcl}\min && \lfunc(\pv) + \reg\textcolor{TolLightOrange}{\transp{\1}\bv} + \pfunc(\pv) \\
+                    \text{s.t.} && \textcolor{TolLightOrange}{\bvi{\idxentry} = 0 \implies \pvi{\idxentry} = 0, \ \forall \idxentry} \\
+                    && \pv \in \kR^{\pdim}, \ \textcolor{TolLightOrange}{\bv \in \{0,1\}^{\pdim}}\end{array}\right.$
+                    \end{blockcolor}
+                };
+                %
+                \draw[ultra thick,->] (problem) -- ($(mip.north)+(0,-0.25)$) node[midway,font=\small,fill=TolLightWhite,draw,ultra thick,yshift=1.5pt] {linearize the  $\ell_0$-norm};
+            }
+            %
+            %
+            %
+            \onslide<4-> {
+                \node[align=center,text width=0.45\textwidth] (practical-mip) at ($(mip)+(0,-3.25)$) {};
+                %
+                \node[text width=0.65\linewidth,align=center,font=\small] at ($(practical-mip)+(5.75,-0.15)$) {
+                    \textbf{Avoid logical constraint } \\[0.5em]
+                    $\tilde{\pfunc}(\pv,\bv) = 
+                    \begin{cases}
+                        \pfunc(\pv) &\text{if } \bvi{\idxentry} = 0 \implies \pvi{\idxentry} = 0, \forall \idxentry \\
+                        +\infty &\text{otherwise}
+                    \end{cases}
+                    $
+                };
+            }
+            %
+            %
+            %
+            \onslide<5-> {
+                \node[align=center,text width=0.45\textwidth] (practical-mip) at ($(mip)+(0,-3.25)$) {
+                    \begin{blockcolor}{mDarkTeal}{MIP formulation}
+                    \centering
+                    $\left\{\begin{array}{rcl}\min && \lfunc(\pv) + \reg\transp{\1}\bv + \textcolor{TolLightOrange}{\tilde{\pfunc}(\pv,\bv)} \\
+                    \text{s.t.} && \pv \in \kR^{\pdim}, \ \bv \in \{0,1\}^{\pdim}\end{array}\right.$
+                    \end{blockcolor}
+                };
+                %
+                \draw[ultra thick,->] (mip) -- ($(practical-mip.north)+(0,-0.25)$) node[midway,font=\small,fill=TolLightWhite,draw,ultra thick,yshift=1.5pt] {avoid logical cstr.};
+            }
+        \end{scope}
+    \end{tikzpicture}
+\end{frame}
+
+\begin{frame}{MIP -- Penalty function}
+    \begin{tikzpicture}[remember picture,overlay]
+        \begin{scope}[xshift=0.5\textwidth]
+            \onslide<+-> {
+                \node at (0,3.5) {\textbf{Two existing strategies to design $\tilde{\pfunc}(\pv,\bv)$}};
+                %
+                \node[text width=0.65\linewidth,align=center,font=\small] at (0,2.5) {
+                    $\tilde{\pfunc}(\pv,\bv) = 
+                    \begin{cases}
+                        \pfunc(\pv) &\text{if } \bvi{\idxentry} = 0 \implies \pvi{\idxentry} = 0, \forall \idxentry \\
+                        +\infty &\text{otherwise}
+                    \end{cases}
+                    $
+                };
+            }
+            %
+            %
+            %
+            \onslide<+-> {
+                \node[text width=0.4\linewidth,align=center] (bigm-pv) at (-3,0.5) {\textbf{Big-M strategy} \\ $\pfunc(\pv) = \sum_{\idxentry=1}^{\pdim} \icvx(\abs{\pvi{\idxentry}} \leq \bigM)$ \\ with $\bigM > 0$};
+            }
+            %
+            \onslide<+-> {
+                \node (bigm-pvbv) at (-3,-1.5) {$\tilde{\pfunc}(\pv,\bv) = \sum_{\idxentry=1}^{\pdim} \icvx(\abs{\pvi{\idxentry}} \leq \bigM\textcolor{TolLightOrange}{\bvi{\idxentry}})$};
+                %
+                \draw[->,ultra thick] (bigm-pv) -- (bigm-pvbv);
+            }
+            %
+            %
+            %
+            \onslide<+-> {
+                \node[text width=0.4\linewidth,align=center] (l2norm-pv) at (3,0.5) {\textbf{$\boldsymbol{\ell}_2$-norm strategy} \\ $\pfunc(\pv) = \sum_{\idxentry=1}^{\pdim} \regtwo\pvi{\idxentry}^2$ \\ with $\regtwo > 0$};
+            }
+            %
+            \onslide<+-> {
+                \node (l2norm-pvbv) at (3,-1.5) {$\tilde{\pfunc}(\pv,\bv) = \sum_{\idxentry=1}^{\pdim} \regtwo\tfrac{\pvi{\idxentry}^2}{\textcolor{TolLightOrange}{\bvi{\idxentry}}}$};
+                %
+                \draw[->,ultra thick] (l2norm-pv) -- (l2norm-pvbv);
+            }
+            %
+            %
+            %
+            \onslide<+-> {
+                \node[font=\small] (linear) at (-3,-2.25) {Linear expressions};
+                \node[font=\small] (conic) at (3,-2.25) {Conic expressions};
+                %
+                \draw[ultra thick,<->] (linear) .. controls (0,-3.5) .. (conic) node[midway,below,font=\small] {Standard for off-the-shelf MIP solvers};
+            }
+        \end{scope}
+    \end{tikzpicture}
+\end{frame}
+
+\begin{frame}{MIP -- Let's sum up}
+    \begin{tikzpicture}[remember picture,overlay]
+        \begin{scope}[xshift=0.5\textwidth]
+            \onslide<1-> {
+                \node[align=center,text width=0.425\textwidth] (problem) at (0,3) {
+                    \begin{blockcolor}{mDarkTeal}{Problem}
+                        \centering
+                        $\min_{\pv \in \kR^{\pdim}} \lfunc(\pv) + \reg\norm{\pv}{0} + \pfunc(\pv)$
+                    \end{blockcolor}
+                };
+                %
+                \node[text width=0.6\linewidth,align=center] at ($(problem)+(0,-2.5)$) {
+                    \centering
+                    \textbf{Pipeline} \\
+                    \begin{enumerate}[label=\textbf{\arabic*)}]
+                    \item Introduce binary variable $\bv \in \{0,1\}^{\pdim}$
+                    \item Linearize $\ell_0$-norm as $\norm{\pv}{0} = \transp{\1}\bv$
+                    \item Transform $\pfunc(\pv)$ into $\tilde{\pfunc}(\pv,\bv)$
+                    \item Use generic MIP solvers
+                    \end{enumerate}
+                };
+            }
+            %
+            %
+            %
+            \onslide<2-> {
+                \node[align=center,text width=0.475\textwidth] (problem) at (-3,-2.5) {
+                    \begin{blockcolor}{TolLightGreen}{Pros}
+                    \centering
+                    \begin{itemize}[label=\ding{51}]
+                        \item Rich MIP literature
+                        \item Black-box solvers
+                        \item Straightforward pipeline
+                    \end{itemize}
+                    \end{blockcolor}
+                };
+            }
+            %
+            %
+            %
+            \onslide<3-> {
+                \node[align=center,text width=0.475\textwidth] (problem) at (3,-2.5) {
+                    \begin{blockcolor}{TolLightRed}{Cons}
+                    \centering
+                    \begin{itemize}[label=\ding{55}]
+                        \item Mostly commercial solvers
+                        \item Only for $\pfunc =$ big-M/$\ell_2$-norm
+                        \item Performance issues
+                    \end{itemize}
+                    \end{blockcolor}
+                };
+            }
+        \end{scope}
+    \end{tikzpicture}
+\end{frame}

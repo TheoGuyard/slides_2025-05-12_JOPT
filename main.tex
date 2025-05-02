@@ -30,19 +30,29 @@
 \begin{document}
 
 \begin{frame}[plain,noframenumbering]
-  \begin{center}
-    {\large\textbf{Slides Template}}
-  \end{center}
-  \begin{center}
-    Théo Guyard
-  \end{center}
+  \begin{tikzpicture}[remember picture,overlay]
+    \begin{scope}[xshift=0.5\linewidth]
+      \onslide<1-> {
+        \node at (0,1) {\large\textbf{Optimization methods for $\boldsymbol{\ell}_{\0}$-problems}};
+        %
+        \node[text width=\linewidth,align=center] at (0,0) {Théo Guyard \\ {\small{JOPT, HEC Montréal, Canada -- May 12th, 2025}}};
+      }
+    \end{scope}
+  \end{tikzpicture}
 \end{frame}
 
-% Main slides
+\input{sections/sparse}
+\input{sections/bnb}
+\input{sections/numerics}
+\input{sections/conclusion}
 
-% \backupbegin
-% Supplementary slides
-% \backupend
+\begin{frame}[standout]
+  Question time ! ~\\~\\
+  \includegraphics[width=40pt]{imgs/nerd-face.png}
+\end{frame}
 
+\backupbegin
+\input{sections/supplements}
+\backupend
 
 \end{document}

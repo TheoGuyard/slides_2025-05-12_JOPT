@@ -1,7 +1,7 @@
 % Tikz
 \usetikzlibrary{calc}
 \usetikzlibrary{mindmap,trees,shapes,arrows,backgrounds,topaths}
-\usetikzlibrary{decorations.pathmorphing,shapes.geometric}
+\usetikzlibrary{decorations.pathmorphing, shapes.geometric}
 
 % Text
 \usepackage{enumitem}
@@ -21,6 +21,34 @@
 % Tables
 \usepackage{booktabs}
 \usepackage{array}
+\newcolumntype{L}{>$l<$}
+\arraycolsep=1.4pt
+\setlength{\tabcolsep}{3pt}
 
 % Algos
 \usepackage[ruled]{algorithm2e}
+
+% Code
+\usepackage{listings}
+\lstset{
+  language=Python,
+  basicstyle=\ttfamily\scriptsize,
+  keywordstyle=\color{TolLightOrange},
+  commentstyle=\color{gray},
+  stringstyle=\color{red},
+  breaklines=true,
+  showstringspaces=false,
+  keywordstyle=[2]\color{TolDarkBlue},
+  keywords=[2]{Leastsquares, L2norm, BnbSolver, make_regression, solve, Problem, Minimize, Variable, Bigm},
+}
+
+% Pgfplot
+\pgfplotsset{
+    legend image code/.code={
+        \draw[mark repeat=2,mark phase=2] plot coordinates {
+            (0cm,0cm)
+            (0.25cm,0cm)
+            (0.25cm,0cm)
+        };
+    }
+}

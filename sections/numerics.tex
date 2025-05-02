@@ -1,0 +1,162 @@
+\section{Numerical Illustration}
+
+\begin{frame}{Numerics -- Feature Selection Problem}
+    \begin{tikzpicture}[remember picture,overlay]
+        \begin{scope}[xshift=0.5\linewidth]
+            \onslide<1-> {
+                \node[text width=0.45\linewidth, align=center] (problem) at (0,3.5) {
+                    \begin{blockcolor}{mDarkTeal}{Problem}
+                        \centering
+                        $\min_{\pv \in \kR^{\pdim}} \lfunc(\pv) + \reg\norm{\pv}{0} + \pfunc(\pv)$
+                    \end{blockcolor}
+                };
+            }
+            %
+            %
+            %
+            \node[text width=\linewidth,align=center,font=\small] at (0,2.25) {\textbf{MIP solvers:} \ref{plot:cplex} \texttt{cplex} \ref{plot:mosek} \texttt{mosek}$\qquad$\textbf{BnB solvers:} \ref{plot:l0bnb} \texttt{l0bnb} \ref{plot:el0ps} \texttt{el0ps}};
+            %
+            %
+            %
+            \onslide<2-> {
+                \node[font=\small,text width=0.57\linewidth,align=center] at (-3,0.75) {
+                    \textbf{Instance 1}
+                    \begin{itemize}[nosep]
+                        \item[$\bullet$] $\lfunc(\pv) = \tfrac{1}{2}\norm{\obs - \dic\pv}{2}^2$
+                        \item[$\bullet$] $\pfunc(\pv) = \tfrac{\regtwo}{2}\norm{\pv}{2}^2 + \icvx(\norm{\pv}{\infty} \leq \bigM)$
+                        \item[$\bullet$] \texttt{riboflavin} dataset with $\dic \in \kR^{71\times4088}$
+                    \end{itemize}
+                };
+            }
+            %
+            %
+            %
+            \onslide<3-> {
+                \draw[thick,->] (-3.5,-3.75) -- (-1,-3.75) node[midway,below,font=\scriptsize] {less sparse};
+                %
+                \begin{scope}[xshift=-4cm,yshift=-90]
+                    \pgfplotscreateplotcyclelist{cycle_solvers}{
+                        TolLightBlue, very thick, smooth, mark=*, mark options={scale=0.5}\\
+                        TolLightGreen, very thick, smooth, mark=*, mark options={scale=0.5}\\
+                        TolLightBrown, very thick, smooth, mark=*, mark options={scale=0.5}\\
+                        TolLightRed, very thick, smooth, mark=*, mark options={scale=0.5}\\
+                        black, dashed, very thick\\
+                    }
+                    %
+                    \begin{axis}[
+                        width   = 0.475\textwidth,
+                        height  = 0.4\textwidth,,
+                        legend style={
+                            at={(1.1,0.5)},
+                            anchor=west,
+                            legend columns=1,
+                            draw=none
+                        },
+                        cycle list name=cycle_solvers,
+                        mbaseplot,
+                        axis line style = ultra thick,
+                        major tick style = {ultra thick,color=mDarkTeal},
+                        xmajorgrids=true,
+                        ymajorgrids=true,
+                        major grid style={dotted},
+                        % axis x line=bottom,
+                        axis y line=left,
+                        ymode=log,
+                        xmode=log,
+                        minor tick style={draw=none},
+                        x dir=reverse,
+                        ymin = 0.0005,
+                        ymax = 5000,
+                        xmin = 0.07,
+                        xmax = 1.5,
+                        ylabel=\textbf{\small{Time (sec.)}},
+                        xtick={1,0.1},
+                        ytick={0.001,0.1,10,1000},
+                        xticklabels={$\reg_{\max}$,$\reg_{\min}$},
+                    ]
+            
+                        \foreach \solver in {cplex,mosek,l0bnb,el0ps,max}{
+                            \addplot table[
+                                x=lgrid,
+                                y=\solver_solve_time,
+                                col sep=comma
+                            ] {data/regpath-dataset=riboflavin-datafit=Leastsquares-penalty=BigmL2norm.csv};
+                            \label{plot:\solver}
+                        }
+                    \end{axis}
+                \end{scope}
+            }
+            %
+            %
+            %
+            \onslide<4-> {
+                \node[font=\small,text width=0.55\linewidth,align=center] at (3.25,0.75) {
+                    \textbf{Instance 2}
+                    \begin{itemize}[nosep]
+                        \item[$\bullet$] $\lfunc(\pv) = \transp{\1}\log(\1 + \exp(-\obs \odot \dic\pv))$
+                        \item[$\bullet$] $\pfunc(\pv) = \regtwo\norm{\pv}{1} + \icvx(\norm{\pv}{\infty} \leq \bigM)$
+                        \item[$\bullet$] \texttt{leukemia} dataset with $\dic \in \kR^{38\times7129}$
+                    \end{itemize}
+                };
+            }
+            %
+            %
+            %
+            \onslide<5-> {
+                \draw[thick,->] (2.5,-3.75) -- (5,-3.75) node[midway,below,font=\scriptsize] {less sparse};
+                %
+                \begin{scope}[xshift=2cm,yshift=-90]
+                    \pgfplotscreateplotcyclelist{cycle_solvers}{
+                        TolLightBlue, very thick, smooth, mark=*, mark options={scale=0.5}\\
+                        TolLightGreen, very thick, smooth, mark=*, mark options={scale=0.5}\\
+                        TolLightBrown, very thick, smooth, mark=*, mark options={scale=0.5}\\
+                        TolLightRed, very thick, smooth, mark=*, mark options={scale=0.5}\\
+                        black, dashed, very thick\\
+                    }
+                    %
+                    \begin{axis}[
+                        width   = 0.475\textwidth,
+                        height  = 0.4\textwidth,,
+                        legend style={
+                            at={(1.1,0.5)},
+                            anchor=west,
+                            legend columns=1,
+                            draw=none
+                        },
+                        cycle list name=cycle_solvers,
+                        mbaseplot,
+                        axis line style = ultra thick,
+                        major tick style = {ultra thick,color=mDarkTeal},
+                        xmajorgrids=true,
+                        ymajorgrids=true,
+                        major grid style={dotted},
+                        % axis x line=bottom,
+                        axis y line=left,
+                        ymode=log,
+                        xmode=log,
+                        minor tick style={draw=none},
+                        x dir=reverse,
+                        ymin = 0.0005,
+                        ymax = 5000,
+                        xmin = 0.07,
+                        xmax = 1.5,
+                        ylabel=\textbf{\small{Time (sec.)}},
+                        xtick={1,0.1},
+                        ytick={0.001,0.1,10,1000},
+                        xticklabels={$\reg_{\max}$,$\reg_{\min}$},
+                    ]
+            
+                        \foreach \solver in {cplex,mosek,l0bnb,el0ps,max}{
+                            \addplot table[
+                                x=lgrid,
+                                y=\solver_solve_time,
+                                col sep=comma
+                            ] {data/regpath-dataset=leukemia-datafit=Logistic-penalty=BigmL1norm.csv};
+                        }
+                    \end{axis}
+                \end{scope}
+            }
+        \end{scope}
+    \end{tikzpicture}
+\end{frame}
+  

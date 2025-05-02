@@ -1,0 +1,599 @@
+\section{Branch-and-Bound Algorithms}
+
+\begin{frame}{BnB -- Algorithmic principle}
+    \begin{tikzpicture}[remember picture,overlay]
+        \begin{scope}[xshift=0.5\textwidth]
+        \onslide<1-> {
+            \node[text width=\textwidth,align=center] at (0,3.25) {Explore \textcolor{TolLightOrange}{regions} in the feasible space and \textcolor{TolLightOrange}{prune} those \\ that cannot contain any optimal solution.};
+        }
+        %
+        %
+        %
+        \onslide<2-> {
+            \draw[ultra thick, fill=gray!20,rotate=15] (0,0) ellipse (3.5cm and 1.75cm);
+            \node[rotate=15] at (-0.5,1.25) {\small{Feasible space $\kR^{\pdim}$}};
+            %
+            \draw[black,fill=black] (1,1.5) circle (0.075cm);
+            \draw[black,fill=black] (2,1.5) circle (0.075cm);
+            %
+            \draw[black,fill=black] (-2,0.5) circle (0.075cm);
+            \draw[black,fill=black] (-1,0.5) circle (0.075cm);
+            \draw[black,fill=black] (0,0.5) circle (0.075cm);
+            \draw[black,fill=black] (1,0.5) circle (0.075cm);
+            \draw[black,fill=black] (2,0.5) circle (0.075cm);
+            \draw[black,fill=black] (3,0.5) circle (0.075cm);
+            %
+            \draw[black,fill=black] (-3,-0.5) circle (0.075cm);
+            \draw[black,fill=black] (-2,-0.5) circle (0.075cm);
+            \draw[black,fill=black] (-1,-0.5) circle (0.075cm);
+            \draw[black,fill=black] (0,-0.5) circle (0.075cm);
+            \draw[black,fill=black] (1,-0.5) circle (0.075cm);
+            \draw[black,fill=black] (2,-0.5) circle (0.075cm);
+            %
+            \draw[black,fill=black] (-2,-1.5) circle (0.075cm);
+            \draw[black,fill=black] (-1,-1.5) circle (0.075cm);
+            \draw[black,fill=black] (0,-1.5) circle (0.075cm);
+        }
+        %
+        %
+        %
+        \onslide<3-> {
+            \draw[ultra thick, fill=gray!40,rotate=30] (1,-1.05) ellipse (1cm and 0.75cm);
+            \draw[black,fill=black] (1,-0.5) circle (0.075cm);
+            \draw[black,fill=black] (2,-0.5) circle (0.075cm);
+            \node[rotate=15] at (1.4,0) {\small{Region $\nodeSymb$}};
+        }
+        %
+        %
+        %
+        \onslide<4-> {
+            \draw[ultra thick,->] (2.3,-0.25) .. controls(3.5,-0.5) .. (4,-1) node[below] {\textbf{Pruning test}};
+        }
+        %
+        %
+        %
+        \onslide<5-> {
+            \node[font=\small] at (4,-1.75) {No solutions in region $\nodeSymb$};
+            \draw[ultra thick,fill=TolLightRed!50,rotate=30] (1,-1.05) ellipse (1cm and 0.75cm);
+            \draw[TolLightRed,fill=TolLightRed] (1,-0.5) circle (0.075cm);
+            \draw[TolLightRed,fill=TolLightRed] (2,-0.5) circle (0.075cm);
+            \node[rotate=15] at (1.4,0) {\small{Region $\nodeSymb$}};
+        }
+        %
+        %
+        %
+        %
+        %
+        %
+        \onslide<6-> {
+            \draw[TolLightRed,fill=TolLightRed] (1,1.5) circle (0.075cm);
+            \draw[TolLightRed,fill=TolLightRed] (2,1.5) circle (0.075cm);
+            %
+            \draw[TolLightRed,fill=TolLightRed] (-2,0.5) circle (0.075cm);
+            \draw[TolLightRed,fill=TolLightRed] (0,0.5) circle (0.075cm);
+            \draw[TolLightRed,fill=TolLightRed] (1,0.5) circle (0.075cm);
+            \draw[TolLightRed,fill=TolLightRed] (2,0.5) circle (0.075cm);
+            \draw[TolLightRed,fill=TolLightRed] (3,0.5) circle (0.075cm);
+            %
+            \draw[TolLightRed,fill=TolLightRed] (-3,-0.5) circle (0.075cm);
+            \draw[TolLightRed,fill=TolLightRed] (-1,-0.5) circle (0.075cm);
+            \draw[TolLightRed,fill=TolLightRed] (0,-0.5) circle (0.075cm);
+            %
+            \draw[TolLightRed,fill=TolLightRed] (-2,-1.5) circle (0.075cm);
+            \draw[TolLightRed,fill=TolLightRed] (-1,-1.5) circle (0.075cm);
+            \draw[TolLightRed,fill=TolLightRed] (0,-1.5) circle (0.075cm);
+        }
+        %
+        %
+        %
+        \onslide<7-> {
+            \node at (0,-3.25) {$\begin{array}{lcl}\textbf{Branching step} &\textbf{--}& \text{Region design and exploration} \\  \textbf{Bounding step}  &\textbf{--}& \text{Pruning test evaluation} \end{array}$};
+        }
+        \end{scope}
+    \end{tikzpicture}
+\end{frame}
+
+\begin{frame}{BnB -- Branching step}
+    \begin{tikzpicture}[remember picture,overlay]
+        \begin{scope}[xshift=0.5\textwidth]
+        \onslide<1-> {
+            \node[text width=0.45\linewidth, align=center] (problem) at (0,3.25) {
+            \begin{blockcolor}{mDarkTeal}{Problem}
+                \centering
+                $\min_{\pv \in \kR^{\pdim}} \lfunc(\pv) + \reg\norm{\pv}{0} + \pfunc(\pv)$
+            \end{blockcolor}
+            };
+        }
+        %
+        %
+        %
+        \onslide<2-> {
+            \node[text width=0.4\linewidth,align=center] (obs) at ($(problem)+(-4,-1.5)$) {\textbf{Observation} \\ Solutions are expected \\ to be sparse};
+        }
+        %
+        %
+        %
+        \onslide<3-> {
+            \node[text width=0.4\linewidth,align=center] (method) at ($(problem)+(4,-1.5)$) {\textbf{Method} \\ Drive the sparsity of the optimization variable};
+        }
+        %
+        %
+        %
+        \onslide<10-> {
+            \node[text width=0.5\linewidth,align=center] at (3.25,-3.25) {\textbf{Specialized rules for} \\ \begin{itemize}[label=\textbullet,nosep] \item the next index to branch on \item the next region to explore\end{itemize}};
+        }
+        \end{scope}
+        %
+        %
+        %
+        \begin{scope}[xshift=0.5\linewidth,scale=0.3]
+            \onslide<4-> {
+                \node at (0,4) (node0) {};
+                \fill[gray!60] ($(node0)+(-2,1.8)$) -- ($(node0)+(1.8,1.8)$) -- ($(node0)+(1.8,-2)$) -- ($(node0)+(-2,-2)$) -- ($(node0)+(-2,1.8)$);
+                \draw[very thick, mDarkTeal, ->] ($(node0)+(-2.3,0)$) -- ($(node0)+(2.5,0)$) node[right] {\small$\pvi{1}$};
+                \draw[very thick, mDarkTeal, ->] ($(node0)+(0,-2.3)$) -- ($(node0)+(0,2.5)$) node[above] {\small$\pvi{2}$};
+                \node at ($(node0)+(-2.2,2.2)$) {$\kR^2$};
+            }
+            %
+            %
+            %
+            \onslide<5-> {
+                \node at ($(node0)+(10,-7)$) (node1) {};
+                \fill[gray!60] ($(node1)+(-2,1.8)$) -- ($(node1)+(-0.3,1.8)$) -- ($(node1)+(-0.3,-2)$) -- ($(node1)+(-2,-2)$) -- ($(node1)+(-2,1.8)$);
+                \fill[gray!60] ($(node1)+(1.8,1.8)$) -- ($(node1)+(0.3,1.8)$) -- ($(node1)+(0.3,-2)$) -- ($(node1)+(1.8,-2)$) -- ($(node1)+(1.8,1.8)$);
+                \draw[very thick, mDarkTeal, ->] ($(node1)+(-2.3,0)$) -- ($(node1)+(2.5,0)$) node[right] {\small$\pvi{1}$};
+                \draw[very thick, mDarkTeal, ->] ($(node1)+(0,-2.3)$) -- ($(node1)+(0,2.5)$) node[above] {\small$\pvi{2}$};
+                %
+                \node at ($(node0)+(-10,-7)$) (node2) {};
+                \fill[gray!60] ($(node2)+(-0.3,1.8)$) -- ($(node2)+(0.3,1.8)$) -- ($(node2)+(0.3,-2)$) -- ($(node2)+(-0.3,-2)$) -- ($(node2)+(-0.3,1.8)$);
+                \draw[very thick, mDarkTeal, ->] ($(node2)+(-2.3,0)$) -- ($(node2)+(2.5,0)$) node[right] {\small$\pvi{1}$};
+                \draw[very thick, mDarkTeal, ->] ($(node2)+(0,-2.3)$) -- ($(node2)+(0,2.5)$) node[above] {\small$\pvi{2}$};
+                %
+                \draw[very thick,dashed,->] ($(node0)+(0,-3)$) .. controls ($(node0)+(0,-5)$) .. ($(node1)+(-4,1)$);
+                \draw[very thick,dashed,->] ($(node0)+(0,-3)$) .. controls ($(node0)+(0,-5)$) .. ($(node2)+(4,1)$);
+                %
+                \node[draw,very thick,fill=TolLightWhite,rotate=10,font=\scriptsize,inner sep=2] at (-2.5,-1.25) {$\pvi{1} = 0$};
+                %
+                \node[draw,very thick,fill=TolLightWhite,rotate=-10,font=\scriptsize,inner sep=1.75] at (2.5,-1.25) {$\pvi{1} \neq 0$};
+            }
+            %
+            %
+            %
+            \onslide<6-> {
+                \fill[TolLightRed!50] ($(node1)+(-2,1.8)$) -- ($(node1)+(-0.3,1.8)$) -- ($(node1)+(-0.3,-2)$) -- ($(node1)+(-2,-2)$) -- ($(node1)+(-2,1.8)$);
+                \fill[TolLightRed!50] ($(node1)+(1.8,1.8)$) -- ($(node1)+(0.3,1.8)$) -- ($(node1)+(0.3,-2)$) -- ($(node1)+(1.8,-2)$) -- ($(node1)+(1.8,1.8)$);
+                \draw[very thick, mDarkTeal, ->] ($(node1)+(-2.3,0)$) -- ($(node1)+(2.5,0)$);
+                \draw[very thick, mDarkTeal, ->] ($(node1)+(0,-2.3)$) -- ($(node1)+(0,2.5)$);
+                \node[font=\small,TolLightRed] at ($(node1)+(0,-3)$) {no solutions here};
+            }
+            %
+            %
+            %
+            \onslide<7-> {
+                \node at ($(node2)+(-6,-7)$) (node3) {};
+                \fill[gray!60] ($(node3)+(0.3,0.3)$) -- ($(node3)+(-0.3,0.3)$) -- ($(node3)+(-0.3,-0.3)$) -- ($(node3)+(0.3,-0.3)$) -- ($(node3)+(0.3,0.3)$);
+                %
+                \draw[very thick, mDarkTeal, ->] ($(node3)+(-2.3,0)$) -- ($(node3)+(2.5,0)$) node[right] {\small$\pvi{1}$};
+                \draw[very thick, mDarkTeal, ->] ($(node3)+(0,-2.3)$) -- ($(node3)+(0,2.5)$) node[above] {\small$\pvi{2}$};
+                %
+                \node at ($(node2)+(6,-7)$) (node4) {};
+                \fill[gray!60] ($(node4)+(0.3,-2)$) -- ($(node4)+(0.3,-0.3)$) -- ($(node4)+(-0.3,-0.3)$) -- ($(node4)+(-0.3,-2)$) -- ($(node4)+(0.3,-2)$);
+                \fill[gray!60] ($(node4)+(0.3,1.8)$) -- ($(node4)+(0.3,0.3)$) -- ($(node4)+(-0.3,0.3)$) -- ($(node4)+(-0.3,1.8)$) -- ($(node4)+(0.3,1.8)$);
+                %
+                \draw[very thick, mDarkTeal, ->] ($(node4)+(-2.3,0)$) -- ($(node4)+(2.5,0)$) node[right] {\small$\pvi{1}$};
+                \draw[very thick, mDarkTeal, ->] ($(node4)+(0,-2.3)$) -- ($(node4)+(0,2.5)$) node[above] {\small$\pvi{2}$};
+                %       
+                \draw[very thick,dashed,->] ($(node2)+(0,-3)$) .. controls ($(node2)+(0,-4)$) .. ($(node3)+(2.2,2)$);
+                \draw[very thick,dashed,->] ($(node2)+(0,-3)$) .. controls ($(node2)+(0,-4)$) .. ($(node4)+(-2.2,2)$);
+                %
+                \node[draw,very thick,fill=TolLightWhite,rotate=15,font=\scriptsize,inner sep=2] at (-11.75,-7.35) {$\pvi{2} = 0$};
+                %
+                \node[draw,very thick,fill=TolLightWhite,rotate=-15,font=\scriptsize,inner sep=1.75] at (-8.25,-7.35) {$\pvi{2} \neq 0$};
+            }
+            %
+            %
+            %
+            \onslide<8-> {
+                \fill[TolLightRed!50] ($(node3)+(0.3,0.3)$) -- ($(node3)+(-0.3,0.3)$) -- ($(node3)+(-0.3,-0.3)$) -- ($(node3)+(0.3,-0.3)$) -- ($(node3)+(0.3,0.3)$);
+                \draw[very thick, mDarkTeal, ->] ($(node3)+(-2.3,0)$) -- ($(node3)+(2.5,0)$);
+                \draw[very thick, mDarkTeal, ->] ($(node3)+(0,-2.3)$) -- ($(node3)+(0,2.5)$);
+                \node[font=\small,TolLightRed] at ($(node3)+(0,-3)$) {no solutions here};
+            }
+            %
+            %
+            %
+            \onslide<9-> {
+                \node[font=\small] at ($(node4)+(0,-3)$) {local solution here};
+            }
+        \end{scope}
+    \end{tikzpicture}
+\end{frame}
+
+\begin{frame}{BnB -- Bounding step}
+    \begin{tikzpicture}[remember picture,overlay]
+        \begin{scope}[xshift=0.5\textwidth]
+        \onslide<1-> {
+            \begin{scope}[scale=0.3]
+                \node at (-12,9) (nodek) {};
+                \fill[gray!60] ($(nodek)+(-2,1.8)$) -- ($(nodek)+(-0.3,1.8)$) -- ($(nodek)+(-0.3,-2)$) -- ($(nodek)+(-2,-2)$) -- ($(nodek)+(-2,1.8)$);
+                \fill[gray!60] ($(nodek)+(1.8,1.8)$) -- ($(nodek)+(0.3,1.8)$) -- ($(nodek)+(0.3,-2)$) -- ($(nodek)+(1.8,-2)$) -- ($(nodek)+(1.8,1.8)$);
+                \draw[very thick, mDarkTeal, ->] ($(nodek)+(-2.3,0)$) -- ($(nodek)+(2.5,0)$) node[right] {\small$\pvi{1}$};
+                \draw[very thick, mDarkTeal, ->] ($(nodek)+(0,-2.3)$) -- ($(nodek)+(0,2.5)$) node[above] {\small$\pvi{2}$};
+                \node at ($(nodek)+(3,2.5)$) {$\nodeSymb$};
+                \node[anchor=west] at ($(nodek)+(7,0)$) {Does region $\nodeSymb$ contains optimal solutions ?};
+            \end{scope}
+        }
+        %
+        %
+        %
+        \onslide<2-> {
+            \node[text width=0.5\linewidth, align=center] (problem) at (-3,1.25) {
+                \begin{blockcolor}{mDarkTeal}{Problem}
+                    \centering
+                    $\opt{\pobj} = \min_{\pv \in \kR^{\pdim}} \lfunc(\pv) + \reg\norm{\pv}{0} + \pfunc(\pv)$
+                \end{blockcolor}
+            };
+        }
+        %
+        %
+        %
+        \onslide<3-> {
+            \node[text width=0.5\linewidth, align=center] (region-problem) at ($(problem)+(0,-2.25)$) {
+                \begin{blockcolor}{mDarkTeal}{Restriction to region $\nodeSymb$}
+                    \centering
+                    $\node{\pobj} = \min_{\textcolor{TolLightOrange}{\pv \in \nodeSymb}} \ \lfunc(\pv) + \reg\norm{\pv}{0} + \pfunc(\pv)$
+                \end{blockcolor}
+            };
+            \draw[ultra thick,->] ($(problem)+(0,-0.75)$) -- ($(region-problem)+(0,0.5)$) node[midway,fill=TolLightWhite,draw,ultra thick,font=\small] {restrict to $\nodeSymb$};
+        }
+        %
+        %
+        %
+        \onslide<4-5> {
+            \node[text width=0.25\linewidth,align=center] (pruning) at ($(region-problem)+(0,-2.25)$) {
+            \begin{blockcolor}{mDarkTeal}{Pruning test}
+                \centering
+                $\node{\pobj} > \opt{\pobj}$
+            \end{blockcolor}
+            };
+            \draw[ultra thick,->] ($(region-problem)+(0,-0.75)$) -- ($(pruning)+(0,0.5)$) node[midway,fill=TolLightWhite,draw,ultra thick,font=\small] {compare};
+        }
+        %
+        %
+        %
+        \onslide<5-> {
+            \draw[ultra thick,->] ($(pruning)+(1.5,-0.1)$) -- ($(pruning)+(2,-0.1)$) node[right,yshift=-1pt] {prune $\nodeSymb$};
+        }
+        %
+        %
+        %
+        \onslide<6-> {
+            \node[text width=0.25\linewidth,align=center] (pruning) at ($(region-problem)+(0,-2.25)$) {
+            \begin{blockcolor}{mDarkTeal}{Pruning test}
+                \centering
+                $\node{\pobj}_{\textcolor{TolLightOrange}{\text{lb}}} > \opt{\pobj}_{\textcolor{TolLightOrange}{\text{ub}}}$
+            \end{blockcolor}
+            };
+            \draw[ultra thick,->] ($(region-problem)+(0,-0.75)$) -- ($(pruning)+(0,0.5)$) node[midway,fill=TolLightWhite,draw,ultra thick,font=\small] {compare};
+        }
+        %
+        %
+        %
+        \onslide<7-> {
+            \node (easy) at ($(problem)+(6,0)$) {\textbf{Easy task}};
+            \node[draw,ultra thick,text width=0.44\linewidth,align=center] (easy-text) at ($(easy.south)+(0,-0.25)$) {Compute an upper bound on $\opt{\pobj}$};
+        }
+        %
+        %
+        %
+        \onslide<8-> {
+            \node[font=\small,text width=0.375\linewidth,align=center,anchor=north] (easy-text2) at ($(easy-text.south)+(0,-0.05)$) {Construct and evaluate a feasible vector in each region explored to refine $\opt{\pobj}_{\text{ub}}$};
+        }
+        %
+        %
+        %
+        \onslide<9-> {
+            \node (hard) at ($(problem)+(6,-3.25)$) {\textbf{Main challenge}};
+            \node[draw,ultra thick,text width=0.44\linewidth,align=center] (hard-text) at ($(hard.south)+(0,-0.25)$) {Compute a lower bound on $\node{\pobj}$};
+        }
+        %
+        %
+        %
+        \onslide<10-> {
+            \node[font=\small,text width=0.375\linewidth,align=center,anchor=north] (hard-text2) at ($(hard-text.south)+(0,-0.05)$) {Construct and solve a \textcolor{TolLightOrange}{relaxation}};
+        }
+        \end{scope}
+    \end{tikzpicture}
+\end{frame}
+
+\begin{frame}{BnB -- Building relaxations}
+    \begin{tikzpicture}[remember picture,overlay]
+        \begin{scope}[xshift=0.5\textwidth]
+            % \onslide<1-> {
+                % \begin{scope}[scale=0.3]
+                %     \node at (-12,9) (node) {};
+                %     \fill[gray!60] ($(node)+(-2,1.8)$) -- ($(node)+(-0.3,1.8)$) -- ($(node)+(-0.3,-2)$) -- ($(node)+(-2,-2)$) -- ($(node)+(-2,1.8)$);
+                %     \fill[gray!60] ($(node)+(1.8,1.8)$) -- ($(node)+(0.3,1.8)$) -- ($(node)+(0.3,-2)$) -- ($(node)+(1.8,-2)$) -- ($(node)+(1.8,1.8)$);
+                %     \draw[very thick, mDarkTeal, ->] ($(node)+(-2.3,0)$) -- ($(node)+(2.5,0)$) node[right] {\small$\pvi{1}$};
+                %     \draw[very thick, mDarkTeal, ->] ($(node)+(0,-2.3)$) -- ($(node)+(0,2.5)$) node[above] {\small$\pvi{2}$};
+                % \end{scope}
+                %
+                % \node[text width=0.75\linewidth,align=left,font=\small] at ($(node)+(6,0)$) {Region $\nodeSymb \equiv (\setzero,\setone,\setnone)$ with $\begin{cases} \pvi{\idxentry} = 0 & \text{if } \idxentry \in \setzero \\ \pvi{\idxentry} \neq 0 & \text{if } \idxentry \in \setone \\ \pvi{\idxentry} \in \kR & \text{if } \idxentry \in \setnone\end{cases}$};
+            % }
+            \onslide<1-> {
+                \node[text width=0.5\linewidth,align=center,font=\small] (restrict) at (-3,2) {
+                    \begin{blockcolor}{mDarkTeal}{Restriction to region $\nodeSymb$}
+                        \centering
+                        $\node{\pobj} = \min_{\pv \in \nodeSymb} \lfunc(\pv) + \reg\norm{\pv}{0} + \pfunc(\pv)$
+                    \end{blockcolor}
+                };  
+                %
+                \node[anchor=west,font=\small] at ($(restrict)+(3,-0.24)$) {seek \textcolor{TolLightOrange}{tight}/\textcolor{TolLightOrange}{tractable} lower bound on $\node{\pobj}$};
+            }
+            %
+            %
+            %
+            \onslide<2-> {
+                \node[text width=0.5\linewidth,align=center,font=\small] (reform) at ($(restrict)+(0,-2.25)$) {
+                    \begin{blockcolor}{mDarkTeal}{Restriction to region $\nodeSymb$}
+                        \centering
+                        $\node{\pobj} = \min_{\textcolor{TolLightOrange}{\pv \in \kR^{\pdim}}} \lfunc(\pv) + \textcolor{TolLightOrange}{\node{\rfunc}}(\pv)$
+                    \end{blockcolor}
+                };
+                %
+                \draw[ultra thick,->] ($(restrict.south)+(0,0.05)$) -- ($(reform.north)+(0,-0.3)$) node[midway,fill=TolLightWhite,draw,font=\small,text width=0.26\linewidth,align=center] {reformulation};
+                %
+                \node[anchor=west,font=\small] at ($(reform)+(3,-0.24)$) {with $\node{\rfunc}$ proper and closed};
+            }
+            %
+            %
+            %
+            \onslide<3-> {
+                \node[text width=0.5\linewidth,align=center,font=\small] (relax) at ($(reform)+(0,-2.25)$) {
+                    \begin{blockcolor}{mDarkTeal}{Relaxation for region $\nodeSymb$}
+                        \centering
+                        $\node{\pobj}_{\text{lb}} = \min_{\pv \in \kR^{\pdim}} \lfunc(\pv) + \textcolor{TolLightOrange}{\node{\rfunc}_{\text{lb}}}(\pv)$
+                    \end{blockcolor}
+                };
+                %
+                \draw[ultra thick,->] ($(reform.south)+(0,0.05)$) -- ($(relax.north)+(0,-0.3)$) node[midway,fill=TolLightWhite,draw,font=\small,text width=0.26\linewidth,align=center] {$\node{\rfunc}_{\text{lb}} \leq \node{\rfunc}$, $\node{\rfunc}_{\text{lb}}$ convex};
+                %
+                \node[anchor=west,font=\small] at ($(relax)+(3,-0.24)$) {set $\node{\rfunc}_{\text{lb}}$ set as the \textcolor{TolLightOrange}{convex envelope} of $\node{\rfunc}$};
+            }
+        \end{scope}
+    \end{tikzpicture}
+\end{frame}
+
+\begin{frame}{BnB -- Geometrical intuition}
+    \begin{tikzpicture}[remember picture,overlay]
+        \begin{scope}[xshift=0.5\textwidth]
+            \onslide<1-> {
+                \node (cvx) at (0,3.25) {\textbf{Convex envelope of $\rfunc(\pv) = \reg\norm{\pv}{0} + \pfunc(\pv)$ with $\pv \in \kR^{\pdim}$}};
+            }
+            %
+            \onslide<2-> {
+                \node (cvx-1d) at (0,1.5) {\textbf{Convex envelope of $\rfunc(\pvi{}) = \reg\norm{\pvi{}}{0} + \pfunc(\pvi{})$ with $\pvi{} \in \kR$}};
+                %
+                \draw[very thick,<->] (cvx) -- (cvx-1d) node[midway,fill=TolLightWhite,draw,font=\small] {$\pfunc$ \textcolor{TolLightOrange}{separable}};
+            }
+            %
+            \begin{scope}[yshift=-0.35\textheight,scale=1.5]
+                \onslide<3-> {
+                    \node[right,LavenderBlush4] at (-2.5,2.25) {$\rfunc(\pvi{}) = \reg\norm{\pvi{}}{0} + \pfunc(\pvi{})$};
+                    \draw[ultra thick,->] (-2.5,-0.5) -- (2.5,-0.5) node[right] {$\pvi{}$};
+                    \draw[ultra thick,->] (0,-0.7) -- (0,2.5);
+                    %
+                    \draw[domain=-1.75:-0.05,smooth,variable=\x,LavenderBlush4,ultra thick] plot ({\x}, {0.5 + 0.5*\x*\x});
+                    \draw[domain=0.05:1.75,smooth,variable=\x,LavenderBlush4,ultra thick] plot ({\x}, {0.5 + 0.5*\x*\x});
+                    \fill[LavenderBlush4] (0,0) circle (0.05);
+                    \draw[LavenderBlush4,ultra thick] (0,0.5) circle (0.05);
+                    %
+                    \draw[LavenderBlush4,very thick,<->] (-0.2,0.05) -- (-0.2,0.45) node[midway,left] {$\reg$};
+                    \node[below left,LavenderBlush4] at (0,0) {$\pfunc(0)$};
+                }
+                %
+                %
+                %
+                \onslide<4-> {
+                  \draw[very thick,dashed] (0,0) -- (2,1.95);
+                  \fill[LavenderBlush4] (0,0) circle (0.05);
+                  \fill[mDarkTeal] (1,0.95) circle (0.05);
+                }
+                %
+                %
+                %
+                \onslide<5-> {
+                  \draw[ultra thick,TolLightOrange,dashed] (0,0) -- (1,0.975);
+                  \draw[domain=1:1.75,smooth,variable=\x,TolLightOrange,dashed,ultra thick] plot ({\x}, {0.45 + 0.5*\x*\x});
+                  \fill[LavenderBlush4] (0,0) circle (0.05);
+                  \fill[mDarkTeal] (1,0.95) circle (0.05);
+                }
+                %
+                %
+                %
+                \onslide<6-> {
+                    \draw[ultra thick,TolLightOrange,dashed] (-1,0.975) -- (0,0);
+                    \draw[domain=-1.75:-1,smooth,variable=\x,TolLightOrange,dashed,ultra thick] plot ({\x}, {0.45 + 0.5*\x*\x});
+                    \fill[LavenderBlush4] (0,0) circle (0.05);
+                    \draw[LavenderBlush4,very thick,<->] (-0.2,0.05) -- (-0.2,0.45) node[midway,left] {$\reg$};
+
+                }
+            \end{scope}
+        \end{scope}
+    \end{tikzpicture}
+\end{frame}
+
+\begin{frame}{BnB -- The secrete sauce}
+    \begin{tikzpicture}[remember picture,overlay]
+        \begin{scope}[xshift=0.5\linewidth]
+            \onslide<1-> {
+                \node[text width=\linewidth,align=center] (complexity) at (0,3.25) {\textbf{Overall solve time} \\ pruning test time $\times$ number of regions processed}; 
+            }
+            %
+            %
+            %
+            \onslide<2-> {
+                \node[text width=0.4\linewidth,align=center,font=\small] (relax) at (-3,1.5) {
+                    \begin{blockcolor}{mDarkTeal}{Relaxation for region $\nodeSymb$}
+                        \centering
+                        $\node{\pobj}_{\text{lb}} = \min_{\pv \in \kR^{\pdim}} \lfunc(\pv) + \node{\rfunc}_{\text{lb}}(\pv)$
+                    \end{blockcolor}
+                };
+                %
+                \draw[ultra thick] ($(complexity)+(-1,-0.4)$) -- ($(complexity)+(-1,-0.5)$) -- ($(complexity)+(-3.75,-0.5)$) -- ($(complexity)+(-3.75,-0.4)$);
+                %
+                \draw[ultra thick,->] ($(complexity)+(-2.3,-0.5)$) -- ($(complexity)+(-2.55,-1)$);
+            }
+            %
+            %
+            %
+            \onslide<3-> {
+                \node[text width=0.5\linewidth,align=center,font=\small] (properties-glb) at ($(relax.south)+(0,-0.5)$) {$\node{\rfunc}_{\text{lb}}$ is proper, closed, convex, \\ separable, and non-smooth at $\pv = \0$};
+            }
+            %
+            %
+            %
+            \onslide<4-> {
+                \node[text width=0.5\linewidth,align=center,font=\small] (convex) at ($(properties-glb.south)+(0,-1)$) {\textbf{This is a \textcolor{TolLightOrange}{convex} sparse optimization problem}};
+                %
+                \draw[ultra thick,->] ($(convex)+(0,1)$) -- ($(convex)+(0,0.5)$);
+            }
+            %
+            %
+            %
+            \onslide<5-> {
+                \node[text width=0.5\linewidth,align=center,font=\small] at ($(convex.south)+(0,-1)$) {$\rightarrow$ first-order methods \\ {\scriptsize{proximal gradient, coordinate descent, ...}} \\ $\rightarrow$ acceleration strategies \\ {\scriptsize{working set, screening tests, ...}}};
+            }
+            %
+            %
+            %
+            \onslide<6-> {
+                \node[text width=0.5\linewidth,align=center,font=\small] (sp) at (3,1.75) {\textbf{Simultaneous pruning}};
+                %
+                \draw[ultra thick] ($(complexity)+(-0.6,-0.4)$) -- ($(complexity)+(-0.6,-0.5)$) -- ($(complexity)+(3.65,-0.5)$) -- ($(complexity)+(3.65,-0.4)$);
+                %
+                \draw[ultra thick,->] ($(complexity)+(1.825,-0.5)$) -- ($(complexity)+(2.075,-1)$);
+            }
+            %
+            %
+            %
+            \onslide<7-> {
+                \node at (3,0.75) (nodek) {};
+                \begin{scope}[scale=0.3]
+                    \fill[gray!60] ($(nodek)+(-2,1.8)$) -- ($(nodek)+(-0.3,1.8)$) -- ($(nodek)+(-0.3,-2)$) -- ($(nodek)+(-2,-2)$) -- ($(nodek)+(-2,1.8)$);
+                    \fill[gray!60] ($(nodek)+(1.8,1.8)$) -- ($(nodek)+(0.3,1.8)$) -- ($(nodek)+(0.3,-2)$) -- ($(nodek)+(1.8,-2)$) -- ($(nodek)+(1.8,1.8)$);
+                    \draw[very thick, mDarkTeal, ->] ($(nodek)+(-2.3,0)$) -- ($(nodek)+(2.5,0)$);
+                    \draw[very thick, mDarkTeal, ->] ($(nodek)+(0,-2.3)$) -- ($(nodek)+(0,2.5)$);
+                \end{scope}
+                %
+                \node[font=\small] at ($(nodek)+(0,-1)$) {processing region ...};
+            }
+            %
+            %
+            %
+            \onslide<8-> {
+                \draw[ultra thick,dashed,->] ($(nodek)+(0,-1.5)$) .. controls ($(nodek)+(0,-2)$) .. ($(nodek)+(0.75,-2.25)$);
+                %
+                \node at (4.5,-2) (child0) {};
+                \begin{scope}[scale=0.3]
+                    \fill[gray!60] ($(child0)+(-2,0.3)$) -- ($(child0)+(-2,2)$) -- ($(child0)+(-0.3,2)$) -- ($(child0)+(-0.3,0.3)$) -- ($(child0)+(-2,0.3)$);
+                    \fill[gray!60] ($(child0)+(2,0.3)$) -- ($(child0)+(2,2)$) -- ($(child0)+(0.3,2)$) -- ($(child0)+(0.3,0.3)$) -- ($(child0)+(2,0.3)$);
+                    \fill[gray!60] ($(child0)+(-2,-0.3)$) -- ($(child0)+(-2,-2)$) -- ($(child0)+(-0.3,-2)$) -- ($(child0)+(-0.3,-0.3)$) -- ($(child0)+(-2,-0.3)$);
+                    \fill[gray!60] ($(child0)+(2,-0.3)$) -- ($(child0)+(2,-2)$) -- ($(child0)+(0.3,-2)$) -- ($(child0)+(0.3,-0.3)$) -- ($(child0)+(2,-0.3)$);
+                    %
+                    \draw[very thick, mDarkTeal, ->] ($(child0)+(-2.3,0)$) -- ($(child0)+(2.5,0)$);
+                    \draw[very thick, mDarkTeal, ->] ($(child0)+(0,-2.3)$) -- ($(child0)+(0,2.5)$);
+                \end{scope}
+                %
+                \node[text width=0.3\linewidth,align=center,font=\small] at ($(child0)+(0,-1.25)$) {perform \textcolor{TolLightOrange}{degraded} but \textcolor{TolLightOrange}{low-cost} pruning test};
+            }
+            %
+            %
+            %
+            \onslide<9-> {
+                \begin{scope}[scale=0.3]
+                    \fill[TolLightRed!50] ($(child0)+(-2,0.3)$) -- ($(child0)+(-2,2)$) -- ($(child0)+(-0.3,2)$) -- ($(child0)+(-0.3,0.3)$) -- ($(child0)+(-2,0.3)$);
+                    \fill[TolLightRed!50] ($(child0)+(2,0.3)$) -- ($(child0)+(2,2)$) -- ($(child0)+(0.3,2)$) -- ($(child0)+(0.3,0.3)$) -- ($(child0)+(2,0.3)$);
+                    \fill[TolLightRed!50] ($(child0)+(-2,-0.3)$) -- ($(child0)+(-2,-2)$) -- ($(child0)+(-0.3,-2)$) -- ($(child0)+(-0.3,-0.3)$) -- ($(child0)+(-2,-0.3)$);
+                    \fill[TolLightRed!50] ($(child0)+(2,-0.3)$) -- ($(child0)+(2,-2)$) -- ($(child0)+(0.3,-2)$) -- ($(child0)+(0.3,-0.3)$) -- ($(child0)+(2,-0.3)$);
+                \end{scope}
+            }
+            %
+            %
+            %
+            \onslide<10-> {
+                \node at (1.5,-2) (child1) {};
+                \begin{scope}[scale=0.3]
+                    \fill[gray!60] ($(child1)+(-2,0.3)$) -- ($(child1)+(-2,-0.3)$) -- ($(child1)+(-0.3,-0.3)$) -- ($(child1)+(-0.3,0.3)$) -- ($(child1)+(-2,0.3)$);
+                    \fill[gray!60] ($(child1)+(2,0.3)$) -- ($(child1)+(2,-0.3)$) -- ($(child1)+(0.3,-0.3)$) -- ($(child1)+(0.3,0.3)$) -- ($(child1)+(2,0.3)$);
+                    %
+                    \draw[very thick, mDarkTeal, ->] ($(child1)+(-2.3,0)$) -- ($(child1)+(2.5,0)$);
+                    \draw[very thick, mDarkTeal, ->] ($(child1)+(0,-2.3)$) -- ($(child1)+(0,2.5)$);
+                \end{scope}
+                %
+                \draw[ultra thick,->] ($(nodek)+(0,-1.5)$) .. controls ($(nodek)+(0,-2)$) .. ($(nodek)+(-0.75,-2.25)$);
+                %
+                \node[text width=0.3\linewidth,align=center,font=\small] at ($(child1)+(0,-1.25)$) {continue \\ processing};
+            }
+            %
+            %
+            %
+            \onslide<11-> {
+                \node[text width=0.3\linewidth,align=center,font=\small,TolLightRed] at ($(child0)+(0,1)$) {bypass region};
+            }
+        \end{scope}
+    \end{tikzpicture}
+\end{frame}
+
+\begin{frame}{BnB -- Let's sum up}
+    \begin{tikzpicture}[remember picture,overlay]
+        \begin{scope}[xshift=0.5\textwidth]
+            \onslide<1-> {
+                \node[align=center,text width=0.425\textwidth] (problem) at (0,3) {
+                    \begin{blockcolor}{mDarkTeal}{Problem}
+                        \centering
+                        $\min_{\pv \in \kR^{\pdim}} \lfunc(\pv) + \reg\norm{\pv}{0} + \pfunc(\pv)$
+                    \end{blockcolor}
+                };
+                %
+                \node[text width=0.475\linewidth,align=center] at ($(problem)+(0,-2)$) {
+                    \centering
+                    \textbf{Pipeline} \\
+                    \begin{enumerate}
+                        \item[\textbf{1a)}] Implement a BnB solver
+                        \item[\textbf{1b)}] Use an existing BnB solver 
+                        \item[\textbf{2)}] Solve the problem
+                    \end{enumerate}
+                };
+            }
+            %
+            %
+            %
+            \onslide<2-> {
+                \node[align=center,text width=0.475\textwidth] (problem) at (-3,-2.25) {
+                    \begin{blockcolor}{TolLightGreen}{Pros}
+                        \centering
+                        \begin{itemize}[label=\ding{51}]
+                            \item Numerical efficiency
+                            \item Open-source softwares
+                            \item Any $\pfunc$ separable and coercive
+                        \end{itemize}
+                    \end{blockcolor}
+                };
+            }
+            %
+            %
+            %
+            \onslide<3-> { 
+                \node[align=center,text width=0.475\textwidth] (problem) at (3,-2.25) {
+                    \begin{blockcolor}{TolLightRed}{Cons}
+                        \centering
+                        \begin{itemize}[label=\ding{55}]
+                            \item Less standard pipeline
+                        \end{itemize}
+                    \end{blockcolor}
+                };
+            }
+        \end{scope}
+    \end{tikzpicture}
+\end{frame}
