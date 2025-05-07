@@ -1,17 +1,26 @@
-\section{Conclusion}
-
 \begin{frame}
     \begin{center}
         \Large{\textbf{Take-home messages}}
     \end{center}
     ~\\
     \begin{itemize}[label=\textbullet]
-        \item Although \textcolor{TolLightOrange}{NP-hard}, $\ell_0$-problems are of \textcolor{TolLightOrange}{practical interest}
-        \item There exists methods to tackle them exactly
-        \begin{itemize}[label=\textbullet]
-        \item \textcolor{TolLightOrange}{MIP-based} off-the-shelf solvers
-        \item \textcolor{TolLightOrange}{BnB-based} specialized algorithms
-        \item Structure-exploitation is key for numerical efficiency
+        \item $\ell_0$-problems are of great practical interest but NP-hard
+        \item Off-the-shelf MIP solvers
+        \begin{itemize}
+            \item[\textcolor{TolLightRed}{\ding{55}}] Poor numerical performances
+            \item[\textcolor{TolLightRed}{\ding{55}}] Need standardized expressions
+        \end{itemize}
+        \item Specialized BnB solvers
+        \begin{itemize}
+            \item[\textcolor{TolLightGreen}{\ding{51}}] Better numerical performances
+            \item[\textcolor{TolLightGreen}{\ding{51}}] Greater flexibility
+        \end{itemize}
+        \item Structure-exploitation is key
+        \begin{itemize}[label=$\rightarrow$]
+            \item Sparsity-driven branching strategy
+            \item Convexification-based bounding strategy
+            \item Efficient convex solver for lower bounds
+            \item Dedicated simultaneous pruning strategy
         \end{itemize}
     \end{itemize}
 \end{frame}

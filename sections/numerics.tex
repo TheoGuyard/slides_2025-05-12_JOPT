@@ -14,7 +14,7 @@
             %
             %
             %
-            \node[text width=\linewidth,align=center,font=\small] at (0,2.25) {\textbf{MIP solvers:} \ref{plot:cplex} \texttt{cplex} \ref{plot:mosek} \texttt{mosek}$\qquad$\textbf{BnB solvers:} \ref{plot:l0bnb} \texttt{l0bnb} \ref{plot:el0ps} \texttt{el0ps}};
+            \node[text width=\linewidth,align=center,font=\small] at (0,2.25) {\textbf{MIP solvers:} \ref{plot:cplex} \texttt{cplex} \ref{plot:mosek} \texttt{mosek}$\qquad$\textbf{BnB solver:} \ref{plot:el0ps} \texttt{el0ps}};
             %
             %
             %
@@ -22,9 +22,9 @@
                 \node[font=\small,text width=0.57\linewidth,align=center] at (-3,0.75) {
                     \textbf{Instance 1}
                     \begin{itemize}[nosep]
-                        \item[$\bullet$] $\lfunc(\pv) = \tfrac{1}{2}\norm{\obs - \dic\pv}{2}^2$
-                        \item[$\bullet$] $\pfunc(\pv) = \tfrac{\regtwo}{2}\norm{\pv}{2}^2 + \icvx(\norm{\pv}{\infty} \leq \bigM)$
-                        \item[$\bullet$] \texttt{riboflavin} dataset with $\dic \in \kR^{71\times4088}$
+                        \item[$\bullet$] $\lfunc: \text{LeastSquares}(\obs,\dic\pv)$
+                        \item[$\bullet$] $\pfunc: \ell_2\text{-norm + bound constraint on } \pv$
+                        \item[$\bullet$] \texttt{riboflavin}: $\obs \in \kR^{71}$ and $\dic \in \kR^{71\times4088}$
                     \end{itemize}
                 };
             }
@@ -38,7 +38,6 @@
                     \pgfplotscreateplotcyclelist{cycle_solvers}{
                         TolLightBlue, very thick, smooth, mark=*, mark options={scale=0.5}\\
                         TolLightGreen, very thick, smooth, mark=*, mark options={scale=0.5}\\
-                        TolLightBrown, very thick, smooth, mark=*, mark options={scale=0.5}\\
                         TolLightRed, very thick, smooth, mark=*, mark options={scale=0.5}\\
                         black, dashed, very thick\\
                     }
@@ -75,7 +74,7 @@
                         xticklabels={$\reg_{\max}$,$\reg_{\min}$},
                     ]
             
-                        \foreach \solver in {cplex,mosek,l0bnb,el0ps,max}{
+                        \foreach \solver in {cplex,mosek,el0ps,max}{
                             \addplot table[
                                 x=lgrid,
                                 y=\solver_solve_time,
@@ -93,9 +92,9 @@
                 \node[font=\small,text width=0.55\linewidth,align=center] at (3.25,0.75) {
                     \textbf{Instance 2}
                     \begin{itemize}[nosep]
-                        \item[$\bullet$] $\lfunc(\pv) = \transp{\1}\log(\1 + \exp(-\obs \odot \dic\pv))$
-                        \item[$\bullet$] $\pfunc(\pv) = \regtwo\norm{\pv}{1} + \icvx(\norm{\pv}{\infty} \leq \bigM)$
-                        \item[$\bullet$] \texttt{leukemia} dataset with $\dic \in \kR^{38\times7129}$
+                        \item[$\bullet$] $\lfunc: \text{Logistic}(\obs,\dic\pv)$
+                        \item[$\bullet$] $\pfunc: \ell_1\text{-norm + bound constraint on } \pv$
+                        \item[$\bullet$] \texttt{leukemia}: $\obs \in \mathbf{B}^{38}$ and $\dic \in \kR^{38\times7129}$
                     \end{itemize}
                 };
             }
@@ -109,7 +108,6 @@
                     \pgfplotscreateplotcyclelist{cycle_solvers}{
                         TolLightBlue, very thick, smooth, mark=*, mark options={scale=0.5}\\
                         TolLightGreen, very thick, smooth, mark=*, mark options={scale=0.5}\\
-                        TolLightBrown, very thick, smooth, mark=*, mark options={scale=0.5}\\
                         TolLightRed, very thick, smooth, mark=*, mark options={scale=0.5}\\
                         black, dashed, very thick\\
                     }
@@ -146,7 +144,7 @@
                         xticklabels={$\reg_{\max}$,$\reg_{\min}$},
                     ]
             
-                        \foreach \solver in {cplex,mosek,l0bnb,el0ps,max}{
+                        \foreach \solver in {cplex,mosek,el0ps,max}{
                             \addplot table[
                                 x=lgrid,
                                 y=\solver_solve_time,

@@ -133,7 +133,7 @@
             \onslide<4-> {
                 \draw [ultra thick,<->] ($(loss)+(1.25,0)$) -- ($(norm)+(-1.25,0)$);
                 %
-                \node[text width=0.45\textwidth] (prob) at (0,-0.5) {
+                \node[text width=0.45\textwidth] (prob) at (0,-0.25) {
                 \begin{blockcolor}{mDarkTeal}{\textbf{$\ell_0$-regularized problem}}
                     \centering
                     $\min_{\pv \in \kR^{\pdim}} \lfunc(\pv) + \reg\norm{\pv}{0}$
@@ -144,10 +144,10 @@
             %
             %
             \onslide<5-> {
-                \node[text width=0.45\textwidth] (prob) at (0,-0.5) {
+                \node[text width=0.45\textwidth] (prob) at (0,-0.25) {
                 \begin{blockcolor}{mDarkTeal}{\textbf{$\ell_0$-regularized problem}}
                     \centering
-                    $\min_{\pv \in \kR^{\pdim}} \lfunc(\pv) + \reg\norm{\pv}{0} +  \pfunc(\pv)$
+                    $\min_{\pv \in \kR^{\pdim}} \lfunc(\pv) + \reg\norm{\pv}{0} +  \textcolor{TolLightOrange}{\pfunc(\pv)}$
                 \end{blockcolor}
                 };
             }
@@ -155,19 +155,27 @@
             %
             %
             \onslide<6-> {
-                \node (np) at ($(prob.east)+(1,-0.15)$) {$\rightarrow$ NP-hard};
+                \node (np) at ($(prob.south)+(0,-0.15)$) {\textbf{NP-hard}};
             }
             %
             %
             %
             \onslide<7-> {
-                \node[text width=0.75\linewidth,align=center] at ($(prob.south)+(-3,-1.5)$) {\textbf{MIP-based methods} \\ Rely on off-the-shelf solvers \\ \textcolor{TolLightRed}{\ding{55}} Poor numerical performances};
+                \node[text width=0.75\linewidth,align=center] at ($(prob.south)+(-3,-1.75)$) {
+                    \textbf{Off-the-shelf MIP solvers} \\ 
+                    \textcolor{TolLightRed}{\ding{55}} Poor numerical performances \\
+                    \textcolor{TolLightRed}{\ding{55}} Need standardized expressions
+                };
             }
             %
             %
             %
             \onslide<8-> {
-                \node[text width=0.75\linewidth,align=center] (bnb) at ($(prob.south)+(3,-1.5)$) {\textbf{BnB-based methods} \\ Tailored solution method \\ \textcolor{TolLightGreen}{\ding{51}} Better numerical performances};
+                \node[text width=0.75\linewidth,align=center] (bnb) at ($(prob.south)+(3,-1.75)$) {
+                    \textbf{Specialized Branch-and-Bound} \\ 
+                    \textcolor{TolLightGreen}{\ding{51}} Better numerical performances \\
+                    \textcolor{TolLightGreen}{\ding{51}} Greater flexibility
+                };
             }
             %
             %
